@@ -1,0 +1,30 @@
+# Python virtual env
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Database (contains runtime data, not source)
+data.db
+*.db-journal
+
+# Logs
+server.log
+*.log
+
+# IDE / Editor
+.workbuddy/
+.codebuddy/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp / junk
+NUL

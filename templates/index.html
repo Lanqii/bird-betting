@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>瓦屋山观鸟押注 - HemLeu 加新竞猜</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg: #f0f4e8;
+    --bg-card: #ffffff;
+    --primary: #2d6a4f;
+    --primary-light: #40916c;
+    --accent: #d4a017;
+    --accent-light: #f0d670;
+    --danger: #c1121f;
+    --text: #1b1b1b;
+    --text-secondary: #555;
+    --border: #dde5d0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(45,106,79,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(212,160,23,0.05) 0%, transparent 50%);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.container { max-width: 680px; margin: 0 auto; padding: 20px 16px 40px; }
+
+/* Header */
+.header { text-align: center; padding: 32px 0 20px; }
+.header-icon { font-size: 48px; margin-bottom: 8px; animation: flap 2s ease-in-out infinite; }
+@keyframes flap {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+}
+.header h1 { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: 1px; }
+.header .subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.header .trip-info { display: inline-block; background: var(--primary); color: white; font-size: 13px; padding: 4px 14px; border-radius: 20px; margin-top: 8px; }
+
+/* Status Bar */
+.status-bar { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: var(--text-secondary); padding: 8px 0; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #aaa; animation: pulse 2s infinite; }
+.status-dot.live { background: #52b788; box-shadow: 0 0 8px rgba(82,183,136,0.6); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Cards */
+.card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 24px; margin-bottom: 16px; border: 1px solid var(--border); }
+.card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.card-title .icon { font-size: 18px; }
+
+/* Stats Grid - 2 columns */
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.stat-item { text-align: center; padding: 16px 8px; background: #f8faf6; border-radius: 10px; border: 1px solid var(--border); }
+.stat-value { font-size: 40px; font-weight: 800; color: var(--primary); line-height: 1.1; }
+.stat-value.highlight { color: var(--accent); font-size: 44px; animation: glow 2s ease-in-out infinite; }
+@keyframes glow { 0%, 100% { text-shadow: 0 0 0px transparent; } 50% { text-shadow: 0 0 20px rgba(212,160,23,0.4); } }
+.stat-value.pending { color: #ccc; font-size: 16px; font-weight: 600; }
+.stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+
+/* Bet Form */
+.bet-form { display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.form-group { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input { padding: 12px 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px; font-family: var(--font); transition: border-color 0.2s, box-shadow 0.2s; background: #fafbf8; color: var(--text); height: 48px; box-sizing: border-box; }
+.form-group input:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(45,106,79,0.1); }
+.form-group input::placeholder { color: #bbb; }
+.form-group input:disabled { background: #eee; color: #999; cursor: not-allowed; }
+
+.btn { padding: 0 24px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--font); white-space: nowrap; height: 48px; line-height: 48px; box-sizing: border-box; }
+.btn-group { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.btn-group .btn { margin-top: auto; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,106,79,0.3); }
+.btn-primary:disabled { background: #aaa; cursor: not-allowed; transform: none; box-shadow: none; }
+.form-error { color: var(--danger); font-size: 12px; margin-top: 2px; min-height: 18px; }
+
+/* Bet locked */
+.bet-locked { text-align: center; padding: 20px 0; color: var(--text-secondary); font-size: 15px; }
+.bet-locked .icon { font-size: 32px; display: block; margin-bottom: 8px; }
+
+/* Leaderboard */
+.leaderboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.leaderboard-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); }
+.bet-count { font-size: 12px; color: var(--text-secondary); }
+
+.lb-row { display: flex; align-items: center; padding: 12px 14px; border-radius: 10px; margin-bottom: 6px; transition: background 0.2s; gap: 12px; }
+.lb-row:hover { background: #f8faf6; }
+.lb-rank { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+.lb-rank.top1 { background: #ffd700; color: #5c4700; }
+.lb-rank.top2 { background: #c0c0c0; color: #444; }
+.lb-rank.top3 { background: #cd7f32; color: #fff; }
+.lb-rank.normal { background: #e8ede4; color: #666; }
+.lb-nickname { flex: 1; font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-prediction { font-weight: 800; font-size: 16px; color: var(--primary); min-width: 40px; text-align: right; }
+.lb-diff { font-size: 12px; min-width: 80px; text-align: right; }
+.lb-diff.exact { color: #52b788; font-weight: 700; }
+.lb-diff.close { color: #74c69d; }
+.lb-diff.far { color: #aaa; }
+.lb-diff.waiting { color: #bbb; font-style: italic; }
+.empty-state { text-align: center; color: #aaa; padding: 24px; font-size: 14px; }
+
+/* Last update */
+.last-update { font-size: 11px; color: #aaa; text-align: center; margin-top: 8px; }
+
+/* Refresh bar */
+.refresh-bar { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; }
+.refresh-btn { background: none; border: 1px solid var(--border); padding: 4px 12px; border-radius: 14px; font-size: 12px; cursor: pointer; color: var(--text-secondary); font-family: var(--font); transition: all 0.2s; }
+.refresh-btn:hover { background: #e8ede4; }
+
+/* Toast */
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 24px; border-radius: 20px; font-size: 14px; z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.toast.success { background: var(--primary); }
+.toast.error { background: var(--danger); }
+
+/* Loading */
+.loading { text-align: center; padding: 20px; color: var(--text-secondary); }
+.loading::after { content: "..."; animation: dots 1.5s steps(4, end) infinite; }
+@keyframes dots { 0%, 20% { content: "."; } 40% { content: ".."; } 60%, 100% { content: "..."; } }
+
+/* Responsive */
+@media (max-width: 480px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .stat-value { font-size: 32px; }
+    .stat-value.highlight { font-size: 36px; }
+    .stat-value.pending { font-size: 14px; }
+    .form-row { flex-direction: column; align-items: stretch; }
+    .btn-group { flex-direction: row; align-items: flex-end; }
+    .btn-group label { display: none; }
+    .btn-group .btn { flex: 1; }
+    .card { padding: 16px; }
+    .container { padding: 12px 10px 30px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="header-icon">🦅</div>
+        <h1>瓦屋山观鸟押注</h1>
+        <p class="subtitle">竞猜 HemLeu 能加新多少种鸟？</p>
+        <span class="trip-info">📅 2026.06.05 - 06.09</span>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">加载中...</span>
+        <button class="refresh-btn" onclick="loadAllData()">🔄 刷新</button>
+    </div>
+
+    <!-- HemLeu Stats Card -->
+    <div class="card" id="statsCard">
+        <div class="card-title"><span class="icon">📊</span> HemLeu 实时数据</div>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="totalSpecies">-</div>
+                <div class="stat-label">个人总鸟种数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value highlight" id="newSpecies">-</div>
+                <div class="stat-label" id="newSpeciesLabel">🏆 瓦屋山加新</div>
+            </div>
+        </div>
+        <div class="last-update" id="lastUpdate">-</div>
+    </div>
+
+    <!-- Bet Card -->
+    <div class="card" id="betCard">
+        <div class="card-title"><span class="icon">🎯</span> <span id="betCardTitle">下注你的预测</span></div>
+        <!-- Before trip: always show form -->
+        <div id="betFormSection">
+            <div class="bet-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>你的昵称</label>
+                        <input type="text" id="nicknameInput" placeholder="输入昵称" maxlength="20" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>预测加新种数</label>
+                        <input type="number" id="predictionInput" placeholder="0" min="0" max="999">
+                    </div>
+                    <div class="btn-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" onclick="placeBet()" id="betBtn">提交押注</button>
+                    </div>
+                </div>
+                <div class="form-error" id="formError"></div>
+            </div>
+        </div>
+        <!-- After trip starts: locked message -->
+        <div id="betLockedSection" style="display:none;">
+            <div class="bet-locked">
+                <span class="icon">🔒</span>
+                下注阶段已结束，看看别人的预测吧~
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Card -->
+    <div class="card" id="leaderboardCard">
+        <div class="leaderboard-header">
+            <span class="leaderboard-title">🏅 押注排行榜</span>
+            <span class="bet-count" id="betCount">-</span>
+        </div>
+        <div id="leaderboardContent" class="loading">加载中</div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center;padding:16px;color:#aaa;font-size:11px;">
+        数据来源：中国观鸟记录中心 · 每日 12:00 / 00:00 自动刷新
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'hemleu_bet_nickname';
+
+function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || 'success') + ' show';
+    setTimeout(() => { t.className = 'toast'; }, 2500);
+}
+
+async function loadAllData() {
+    try {
+        const resp = await fetch('/api/stats');
+        if (!resp.ok) throw new Error('服务器错误');
+        const data = await resp.json();
+        renderStats(data.stats, data.trip_status);
+        renderLeaderboard(data.bets, data.trip_status);
+        renderBetCard(data.trip_status);
+        updateStatus(data.trip_status);
+    } catch (err) {
+        console.error(err);
+        showToast('加载失败，请稍后重试', 'error');
+    }
+}
+
+function renderStats(stats, tripStatus) {
+    // 总鸟种数
+    document.getElementById('totalSpecies').textContent = stats.total_species || 0;
+    
+    // 加新数
+    const newSpeciesEl = document.getElementById('newSpecies');
+    const labelEl = document.getElementById('newSpeciesLabel');
+    
+    if (tripStatus === 'before') {
+        newSpeciesEl.textContent = '还未开始';
+        newSpeciesEl.className = 'stat-value pending';
+        labelEl.textContent = '🏆 瓦屋山加新';
+    } else {
+        newSpeciesEl.textContent = stats.new_species || 0;
+        newSpeciesEl.className = 'stat-value highlight';
+        labelEl.textContent = '🏆 瓦屋山加新';
+    }
+    
+    // 更新时间
+    const updateEl = document.getElementById('lastUpdate');
+    updateEl.textContent = stats.computed_at ? '更新时间：' + stats.computed_at : '等待首次数据刷新...';
+}
+
+function renderLeaderboard(bets, tripStatus) {
+    const container = document.getElementById('leaderboardContent');
+    const countEl = document.getElementById('betCount');
+    
+    if (!bets || bets.length === 0) {
+        container.innerHTML = '<div class="empty-state">还没有人下注，来做第一个吧！</div>';
+        countEl.textContent = '0 人已押注';
+        return;
+    }
+    
+    countEl.textContent = bets.length + ' 人已押注';
+    
+    let html = '';
+    bets.forEach((bet, index) => {
+        const rank = index + 1;
+        let rankClass = 'normal', rankIcon = rank;
+        if (rank === 1) { rankClass = 'top1'; rankIcon = '🥇'; }
+        else if (rank === 2) { rankClass = 'top2'; rankIcon = '🥈'; }
+        else if (rank === 3) { rankClass = 'top3'; rankIcon = '🥉'; }
+        
+        let diffHtml = '';
+        if (tripStatus !== 'before' && bet.diff !== null && bet.diff !== undefined) {
+            if (bet.diff === 0) {
+                diffHtml = '<span class="lb-diff exact">🎯 精准命中!</span>';
+            } else {
+                const diffClass = bet.diff <= 5 ? 'close' : 'far';
+                diffHtml = `<span class="lb-diff ${diffClass}">差 ${bet.diff} 种</span>`;
+            }
+        } else {
+            diffHtml = '<span class="lb-diff waiting">等待揭晓</span>';
+        }
+        
+        html += `<div class="lb-row">
+            <div class="lb-rank ${rankClass}">${rankIcon}</div>
+            <div class="lb-nickname">${escapeHtml(bet.nickname)}</div>
+            <div class="lb-diff">${diffHtml}</div>
+            <div class="lb-prediction">${bet.prediction}</div>
+        </div>`;
+    });
+    
+    container.innerHTML = html;
+}
+
+function renderBetCard(tripStatus) {
+    const formSection = document.getElementById('betFormSection');
+    const lockedSection = document.getElementById('betLockedSection');
+    const betCardTitle = document.getElementById('betCardTitle');
+    const nicknameInput = document.getElementById('nicknameInput');
+    const predictionInput = document.getElementById('predictionInput');
+    const betBtn = document.getElementById('betBtn');
+    
+    if (tripStatus === 'before') {
+        // 6月5日前：可随意下注和修改
+        betCardTitle.textContent = '下注你的预测';
+        formSection.style.display = 'block';
+        lockedSection.style.display = 'none';
+        nicknameInput.disabled = false;
+        predictionInput.disabled = false;
+        betBtn.disabled = false;
+        betBtn.textContent = '提交押注';
+        
+        // 恢复已保存的昵称
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            nicknameInput.value = saved;
+            // 获取已保存的预测数并填入
+            fetch('/api/bet/' + encodeURIComponent(saved))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.found) {
+                        predictionInput.value = data.bet.prediction;
+                    }
+                }).catch(() => {});
+        }
+    } else {
+        // 6月5日0点后：锁定
+        betCardTitle.textContent = '我的预测';
+        formSection.style.display = 'none';
+        lockedSection.style.display = 'block';
+    }
+}
+
+async function placeBet() {
+    const nickname = document.getElementById('nicknameInput').value.trim();
+    const predictionStr = document.getElementById('predictionInput').value.trim();
+    const errorEl = document.getElementById('formError');
+    
+    if (!nickname) { errorEl.textContent = '请输入昵称'; return; }
+    if (nickname.length > 20) { errorEl.textContent = '昵称不能超过20个字符'; return; }
+    if (!predictionStr) { errorEl.textContent = '请输入预测数量'; return; }
+    const prediction = parseInt(predictionStr);
+    if (isNaN(prediction) || prediction < 0) { errorEl.textContent = '请输入有效的非负整数'; return; }
+    if (prediction > 999) { errorEl.textContent = '预测数不能超过999'; return; }
+    
+    errorEl.textContent = '';
+    
+    try {
+        const resp = await fetch('/api/bet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nickname, prediction })
+        });
+        const data = await resp.json();
+        
+        if (resp.ok && data.success) {
+            localStorage.setItem(STORAGE_KEY, nickname);
+            showToast('押注成功！预测 ' + prediction + ' 种');
+            loadAllData();
+        } else {
+            errorEl.textContent = data.error || '提交失败';
+        }
+    } catch (err) {
+        errorEl.textContent = '网络错误，请重试';
+    }
+}
+
+function updateStatus(tripStatus) {
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    
+    dot.className = 'status-dot';
+    switch (tripStatus) {
+        case 'before': text.textContent = '等待行程开始 (6月5日)'; break;
+        case 'during': dot.classList.add('live'); text.textContent = '行程进行中 - 实时更新'; break;
+        case 'after': text.textContent = '行程已结束'; break;
+    }
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadAllData();
+    setInterval(loadAllData, 30000);
+});
+</script>
+
+</body>
+</html>
