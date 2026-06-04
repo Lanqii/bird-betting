@@ -259,6 +259,13 @@ h1 {{ font-size: 24px; font-weight: 800; color: var(--primary); letter-spacing: 
 
 
 def main():
+    # 先从飞书多维表格同步最新押注数据
+    try:
+        from sync_lark_bets import main as sync_lark
+        sync_lark()
+    except Exception as e:
+        print(f"[generate_static] 飞书同步跳过: {e}")
+
     data = get_current_data()
     trip_status = get_trip_status()
     
