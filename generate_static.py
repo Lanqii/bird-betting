@@ -52,7 +52,7 @@ def get_current_data():
 def get_trip_status():
     """判断行程状态"""
     now = datetime.now()
-    trip_start = datetime(2026, 6, 5, 0, 0, 0)
+    trip_start = datetime(2026, 6, 6, 0, 0, 0)
     trip_end = datetime(2026, 6, 9, 23, 59, 59)
     
     if now < trip_start:
@@ -112,7 +112,7 @@ def generate_html(data, trip_status):
     
     # 状态栏文字
     status_map = {
-        "before": "等待行程开始 (6月5日)",
+        "before": "等待行程开始 (6月6日)",
         "during": "行程进行中 - 实时更新",
         "after": "行程已结束",
     }

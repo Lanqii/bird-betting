@@ -228,7 +228,7 @@ def get_trip_date_status() -> str:
         "after" - 行程结束后
     """
     now = time.strftime("%Y-%m-%d")
-    TRIP_START = "2026-06-05"
+    TRIP_START = "2026-06-06"
     TRIP_END = "2026-06-09"
     
     if now < TRIP_START:

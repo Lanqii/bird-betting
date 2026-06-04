@@ -329,7 +329,7 @@ function renderBetCard(tripStatus) {
     const betBtn = document.getElementById('betBtn');
     
     if (tripStatus === 'before') {
-        // 6月5日前：可随意下注和修改
+        // 6月6日0点前：可随意下注和修改
         betCardTitle.textContent = '下注你的预测';
         formSection.style.display = 'block';
         lockedSection.style.display = 'none';
@@ -399,7 +399,7 @@ function updateStatus(tripStatus) {
     
     dot.className = 'status-dot';
     switch (tripStatus) {
-        case 'before': text.textContent = '等待行程开始 (6月5日)'; break;
+        case 'before': text.textContent = '等待行程开始 (6月6日)'; break;
         case 'during': dot.classList.add('live'); text.textContent = '行程进行中 - 实时更新'; break;
         case 'after': text.textContent = '行程已结束'; break;
     }

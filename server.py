@@ -248,7 +248,7 @@ def place_bet():
     if prediction > 999:
         return jsonify({"error": "预测数不能超过999"}), 400
     
-    # 6月5日0点后禁止下注
+    # 6月6日0点后禁止下注
     if get_trip_date_status() != "before":
         return jsonify({"error": "下注阶段已结束"}), 400
     
