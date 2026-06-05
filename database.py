@@ -113,54 +113,80 @@ def get_bet_by_nickname(nickname: str) -> dict:
 # ========== 统计数据相关 ==========
 
 def save_api_stats(stats: dict):
-    """保存 API 自动获取的估算统计数据"""
+    """保存 API 获取的统计数据（自动计算加新数）"""
     conn = get_connection()
     cursor = conn.cursor()
-    
+
+    # 读取基线
+    cursor.execute("SELECT value FROM settings WHERE key = 'baseline'")
+    row = cursor.fetchone()
+    baseline = int(row[0]) if row else 0
+
+    total_species = stats.get("total_species", 0)
+
+    # 自动计算加新数 = 当前总鸟种 - 基线
+    new_species = None
+    if baseline > 0:
+        new_species = max(0, total_species - baseline)
+
     cursor.execute("""
-        INSERT INTO stats_cache (total_species_est, trip_species_est,
-            total_records, trip_records, raw_stats)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO stats_cache
+            (total_species_est, trip_species_est, total_records, trip_records, new_species, raw_stats)
+        VALUES (?, ?, ?, ?, ?, ?)
     """, (
-        stats.get("total_species_est", 0),
-        stats.get("trip_species_est", 0),
+        total_species,
+        stats.get("trip_species", 0),
         stats.get("total_records", 0),
         stats.get("trip_records", 0),
+        new_species,
         json.dumps(stats, ensure_ascii=False)
     ))
-    
+
     conn.commit()
     conn.close()
 
 
 def get_latest_api_stats() -> dict:
-    """获取最新的 API 估算统计"""
+    """获取最新的 API 统计数据（含自动计算的加新数）"""
     conn = get_connection()
     cursor = conn.cursor()
-    # 按 id DESC 排序（而非 computed_at），避免同时间戳时顺序不确定
-    cursor.execute(
-        "SELECT * FROM stats_cache ORDER BY id DESC LIMIT 1"
-    )
+    cursor.execute("SELECT * FROM stats_cache ORDER BY id DESC LIMIT 1")
     row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        return {
+            "total_species": 0,
+            "total_records": 0,
+            "trip_records": 0,
+            "new_species": None,
+            "computed_at": None,
+        }
+
+    row_dict = dict(row)
+
+    # 先合并 raw_stats（保留 new_species，防止被 None 覆盖）
+    if row_dict.get("raw_stats"):
+        try:
+            parsed = json.loads(row_dict["raw_stats"])
+            # raw_stats 里的 new_species 是 None（来自 fetcher），不要用它覆盖
+            parsed.pop("new_species", None)
+            row_dict.update(parsed)
+        except json.JSONDecodeError:
+            pass
+
+    # 用基线自动计算加新数（覆盖 raw_stats 里的值）
+    cursor.execute("SELECT value FROM settings WHERE key = 'baseline'")
+    baseline_row = cursor.fetchone()
+    if baseline_row:
+        baseline = int(baseline_row[0])
+        if baseline > 0:
+            # 优先用 raw_stats 合并后的 total_species
+            total_species = row_dict.get("total_species", row_dict.get("total_species_est", 0))
+            row_dict["new_species"] = max(0, total_species - baseline)
+
     conn.close()
-    
-    if row:
-        row_dict = dict(row)
-        if row_dict.get("raw_stats"):
-            try:
-                parsed = json.loads(row_dict["raw_stats"])
-                row_dict.update(parsed)
-            except json.JSONDecodeError:
-                pass
-        return row_dict
-    
-    return {
-        "total_species_est": 0,
-        "trip_species_est": 0,
-        "total_records": 0,
-        "trip_records": 0,
-        "computed_at": None,
-    }
+    return row_dict
 
 
 def set_baseline(baseline_total_species: int):

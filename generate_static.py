@@ -26,7 +26,19 @@ def get_current_data():
     # 最新鸟种数据
     c.execute("SELECT * FROM stats_cache ORDER BY id DESC LIMIT 1")
     row = c.fetchone()
-    raw = json.loads(row["raw_stats"]) if row else {}
+    
+    if row:
+        # new_species 从表字段读取（自动计算的），不用 raw_stats 里的 None
+        new_species = row["new_species"]
+        raw = json.loads(row["raw_stats"]) if row["raw_stats"] else {}
+        # total_species 优先用 raw_stats 里的（API 原始返回），兜底用表字段
+        total_species = raw.get("total_species", row["total_species_est"])
+        computed_at = row["computed_at"]
+    else:
+        new_species = None
+        total_species = 0
+        raw = {}
+        computed_at = ""
     
     # 所有押注（从 Flask 数据库读取）
     c.execute("SELECT nickname, prediction, created_at FROM bets ORDER BY prediction DESC")
@@ -42,9 +54,9 @@ def get_current_data():
     conn.close()
     
     return {
-        "total_species": raw.get("total_species", 0),
-        "new_species": raw.get("new_species"),
-        "computed_at": row["computed_at"] if row else "",
+        "total_species": total_species,
+        "new_species": new_species,
+        "computed_at": computed_at,
         "bets": bets,
     }
 

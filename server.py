@@ -195,11 +195,14 @@ def get_stats():
     # 总鸟种数始终从 API 自动获取 (来自 record/chart/summary 的 taxon_num_1)
     total_species = api_stats.get("total_species", 0)
     
-    # 加新数: 行程前为 None (前端显示"未开始")，行程开始后使用手动基线差值
+    # 加新数: 优先使用 API 自动计算的，否则使用手动设置的
     if trip_status == "before":
         new_species = None
     else:
-        new_species = manual.get("new_species", 0)
+        # 优先用 API 自动计算的加新数（save_api_stats 自动算好存在表字段里）
+        new_species = api_stats.get("new_species")
+        if new_species is None:
+            new_species = manual.get("new_species", 0)
     
     # 数据更新时间 (优先用手动更新的时间戳)
     computed_at = api_stats.get("computed_at") or manual.get("updated_at")
