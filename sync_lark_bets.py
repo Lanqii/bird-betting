@@ -18,8 +18,8 @@ DB_PATH = BASE_DIR / "data.db"
 LARK_BASE_TOKEN = "LG7RblWFyaGV45sURmtcTmevnTX"
 LARK_TABLE_ID = "tblmzStAbDAEbTZP"
 
-# 忽略的测试昵称
-IGNORE_NICKNAMES = {"测试1", "测试2", "test", "Test", "TEST"}
+# 忽略的测试昵称（只过滤明显的英文测试占位符）
+IGNORE_NICKNAMES = {"test", "Test", "TEST"}
 
 
 def fetch_lark_bets():
