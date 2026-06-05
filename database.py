@@ -117,8 +117,8 @@ def save_api_stats(stats: dict):
     conn = get_connection()
     cursor = conn.cursor()
 
-    # 读取基线
-    cursor.execute("SELECT value FROM settings WHERE key = 'baseline'")
+    # 读取基线（从 manual_stats 表）
+    cursor.execute("SELECT baseline_total_species FROM manual_stats ORDER BY updated_at DESC LIMIT 1")
     row = cursor.fetchone()
     baseline = int(row[0]) if row else 0
 
@@ -174,16 +174,6 @@ def get_latest_api_stats() -> dict:
             row_dict.update(parsed)
         except json.JSONDecodeError:
             pass
-
-    # 用基线自动计算加新数（覆盖 raw_stats 里的值）
-    cursor.execute("SELECT value FROM settings WHERE key = 'baseline'")
-    baseline_row = cursor.fetchone()
-    if baseline_row:
-        baseline = int(baseline_row[0])
-        if baseline > 0:
-            # 优先用 raw_stats 合并后的 total_species
-            total_species = row_dict.get("total_species", row_dict.get("total_species_est", 0))
-            row_dict["new_species"] = max(0, total_species - baseline)
 
     conn.close()
     return row_dict
