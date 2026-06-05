@@ -6,7 +6,7 @@ import json
 import sqlite3
 import subprocess
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 BASE_DIR = Path(__file__).parent
 DB_PATH = BASE_DIR / "data.db"
@@ -258,8 +258,44 @@ h1 {{ font-size: 24px; font-weight: 800; color: var(--primary); letter-spacing: 
 </html>"""
 
 
+def refresh_bird_data_if_stale():
+    """如果鸟种数据缓存超过 6 小时，从 birdreport.cn API 刷新"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT computed_at FROM stats_cache ORDER BY id DESC LIMIT 1")
+    row = c.fetchone()
+    conn.close()
+    
+    if row and row[0]:
+        last_update = datetime.fromisoformat(row[0].replace("Z", "+00:00").replace(" ", "T"))
+        age_hours = (datetime.now(timezone.utc).replace(tzinfo=None) - last_update.replace(tzinfo=None)).total_seconds() / 3600
+        if age_hours < 6:
+            print(f"[bird-refresh] 缓存新鲜 ({age_hours:.1f}小时前)，跳过 API 请求")
+            return
+    
+    print("[bird-refresh] 缓存过期或不存在，从 birdreport.cn 获取数据...")
+    try:
+        from bird_fetcher import fetch_hemleu_data
+        from database import save_api_stats
+        stats = fetch_hemleu_data()
+        save_api_stats(stats)
+        print(
+            f"[bird-refresh] OK: total_species={stats.get('total_species')}, "
+            f"total_records={stats.get('total_records')}, "
+            f"trip_records={stats.get('trip_records')}"
+        )
+    except Exception as e:
+        print(f"[bird-refresh] 失败（使用旧缓存）: {e}")
+
+
 def main():
-    # 先从飞书多维表格同步最新押注数据
+    # Step 1: 刷新鸟种数据（如果缓存过期）——保证即使 Flask 没跑也能拿到最新数据
+    try:
+        refresh_bird_data_if_stale()
+    except Exception as e:
+        print(f"[generate_static] 鸟种刷新跳过: {e}")
+
+    # Step 2: 从飞书多维表格同步最新押注数据
     try:
         from sync_lark_bets import main as sync_lark
         sync_lark()
