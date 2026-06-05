@@ -2,10 +2,9 @@
 从飞书多维表格同步押注数据到本地 data.db。
 - 以昵称为 key 做 upsert（已有则更新，没有则插入）
 - 跳过昵称为空或预测数为空/非法的行
-- 依赖 lark-cli（WorkBuddy 内置），需已通过 lark-cli auth login 完成认证
+- 使用 lark-cli（WorkBuddy 内置），通过 shell 调用（系统 PATH）
 """
 import json
-import os
 import sqlite3
 import subprocess
 import sys
@@ -19,9 +18,6 @@ DB_PATH = BASE_DIR / "data.db"
 LARK_BASE_TOKEN = "LG7RblWFyaGV45sURmtcTmevnTX"
 LARK_TABLE_ID = "tblmzStAbDAEbTZP"
 
-# lark-cli 固定路径（WorkBuddy 内置，是 sh 脚本，需通过 shell 调用）
-LARK_CLI = r"C:\Users\H\.workbuddy\binaries\node\cli-connector-packages\lark-cli"
-
 # 忽略的测试昵称
 IGNORE_NICKNAMES = {"测试1", "测试2", "test", "Test", "TEST"}
 
@@ -31,16 +27,14 @@ def fetch_lark_bets():
     用 lark-cli 读取飞书多维表格中所有押注记录。
     返回 list of dict: [{"nickname": str, "prediction": int}, ...]
     """
+    # 用 shell=True + 直接调 lark-cli 命令名（走系统 PATH）
     cmd = (
-        f'"{LARK_CLI}" base +record-list'
+        f"lark-cli base +record-list"
         f" --base-token {LARK_BASE_TOKEN}"
         f" --table-id {LARK_TABLE_ID}"
         f" --as user"
         f" --format json"
     )
-
-    # 透传 lark-cli 需要的用户 profile 目录（允许访问认证缓存）
-    env = os.environ.copy()
 
     try:
         result = subprocess.run(
@@ -49,21 +43,24 @@ def fetch_lark_bets():
             text=True,
             timeout=30,
             encoding="utf-8",
-            env=env,
-            shell=True,          # Windows 上 lark-cli 是 sh 脚本，需要 shell=True
+            shell=True,   # Windows 下通过 shell 找到 lark-cli
         )
-        if result.returncode != 0:
-            print(f"[sync_lark] lark-cli 错误: {result.stderr[:300]}", file=sys.stderr)
-            return []
 
         raw = result.stdout.strip()
         if not raw:
-            print("[sync_lark] lark-cli 输出为空", file=sys.stderr)
+            print(f"[sync_lark] lark-cli 无输出, stderr={result.stderr[:200]}", file=sys.stderr)
             return []
 
-        data = json.loads(raw)
+        # lark-cli 可能在 stdout 里混入 WARN 行，提取 JSON 部分
+        lines = raw.splitlines()
+        json_lines = [l for l in lines if l.strip().startswith("{") or l.strip().startswith("[")]
+        # 取最后一个连续 JSON 块（跳过 WARN 日志行）
+        json_str = "\n".join(l for l in lines if not l.startswith("[lark-cli]"))
+        json_str = json_str.strip()
+
+        data = json.loads(json_str)
         if not data.get("ok"):
-            print(f"[sync_lark] lark-cli ok=false: {raw[:200]}", file=sys.stderr)
+            print(f"[sync_lark] lark-cli ok=false: {json_str[:200]}", file=sys.stderr)
             return []
 
         inner = data.get("data", {})
@@ -111,7 +108,7 @@ def fetch_lark_bets():
         print("[sync_lark] lark-cli 超时", file=sys.stderr)
         return []
     except json.JSONDecodeError as e:
-        print(f"[sync_lark] JSON 解析失败: {e}", file=sys.stderr)
+        print(f"[sync_lark] JSON 解析失败: {e}\n原始输出: {raw[:300]}", file=sys.stderr)
         return []
     except Exception as e:
         print(f"[sync_lark] 调用失败: {e}", file=sys.stderr)

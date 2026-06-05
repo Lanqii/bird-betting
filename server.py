@@ -34,6 +34,18 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 BASE_DIR = Path(__file__).parent
 
+# ============================================================
+# 飞书多维表格同步（押注数据）
+# ============================================================
+def sync_lark_bets():
+    """从飞书多维表格同步押注数据到本地 data.db（try/except 包装，失败不阻断主流程）"""
+    try:
+        from sync_lark_bets import main as do_sync
+        do_sync()
+        logger.info("[lark-sync] 飞书押注数据同步完成")
+    except Exception as e:
+        logger.warning(f"[lark-sync] 飞书同步失败（已跳过）: {e}")
+
 # CORS 支持 - 允许 CloudStudio 静态页跨域调用
 @app.after_request
 def add_cors_headers(response):
@@ -192,6 +204,9 @@ def get_stats():
     # 数据更新时间 (优先用手动更新的时间戳)
     computed_at = api_stats.get("computed_at") or manual.get("updated_at")
     
+    # 每次返回排行榜前，先从飞书同步最新押注数据
+    sync_lark_bets()
+
     # 获取所有押注
     bets = get_all_bets()
     
@@ -251,6 +266,9 @@ def place_bet():
     # 6月6日0点后禁止下注
     if get_trip_date_status() != "before":
         return jsonify({"error": "下注阶段已结束"}), 400
+    
+    # 提交前先同步飞书数据（避免重复下注）
+    sync_lark_bets()
     
     try:
         bet = create_bet(nickname, prediction)
